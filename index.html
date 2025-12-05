@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador EXANI-I - Pensamiento Matemático</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+</head>
+<body>
+    <!-- Pantalla de Inicio -->
+    <div id="pantalla-inicio" class="pantalla activa">
+        <div class="container">
+            <header>
+                <h1><i class="fas fa-calculator"></i> Simulador EXANI-I</h1>
+                <h2>Pensamiento Matemático</h2>
+                <p class="subtitulo">Preparación para el examen CENEVAL</p>
+            </header>
+            
+            <div class="card">
+                <h3><i class="fas fa-info-circle"></i> Instrucciones del Examen</h3>
+                <ul class="instrucciones">
+                    <li><i class="fas fa-check-circle"></i> <strong>50 preguntas</strong> de Pensamiento Matemático</li>
+                    <li><i class="fas fa-clock"></i> <strong>60 minutos</strong> de tiempo total</li>
+                    <li><i class="fas fa-list-alt"></i> <strong>Opción múltiple</strong> con 4 opciones cada una</li>
+                    <li><i class="fas fa-exchange-alt"></i> Puedes <strong>navegar</strong> entre preguntas</li>
+                    <li><i class="fas fa-chart-bar"></i> <strong>Resultados detallados</strong> con explicaciones</li>
+                    <li><i class="fas fa-save"></i> Tu progreso se <strong>guarda automáticamente</strong></li>
+                </ul>
+                
+                <div class="configuracion">
+                    <h4><i class="fas fa-cog"></i> Configuración del Examen</h4>
+                    
+                    <div class="config-grid">
+                        <div class="config-item">
+                            <label for="modo-examen">
+                                <i class="fas fa-clock"></i> Modo de Examen
+                            </label>
+                            <select id="modo-examen">
+                                <option value="completo">Examen Completo (50 preguntas)</option>
+                                <option value="practica">Práctica Rápida (10 preguntas)</option>
+                                <option value="aleatorio">Preguntas Aleatorias (20 preguntas)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="config-item">
+                            <label for="tiempo-limite">
+                                <i class="fas fa-hourglass-half"></i> Tiempo Límite
+                            </label>
+                            <select id="tiempo-limite">
+                                <option value="60">60 minutos (Completo)</option>
+                                <option value="30">30 minutos (Rápido)</option>
+                                <option value="15">15 minutos (Express)</option>
+                                <option value="0">Sin límite (Práctica)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="config-item">
+                            <label for="dificultad">
+                                <i class="fas fa-chart-line"></i> Nivel de Dificultad
+                            </label>
+                            <select id="dificultad">
+                                <option value="todas">Todas las dificultades</option>
+                                <option value="baja">Baja dificultad</option>
+                                <option value="media">Dificultad media</option>
+                                <option value="alta">Alta dificultad</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="botones-inicio">
+                    <button id="iniciar-examen" class="btn-primario btn-grande">
+                        <i class="fas fa-play-circle"></i> Iniciar Examen
+                    </button>
+                    
+                    <button id="ver-estadisticas" class="btn-secundario">
+                        <i class="fas fa-chart-line"></i> Ver Estadísticas
+                    </button>
+                    
+                    <button id="instrucciones-detalladas" class="btn-secundario">
+                        <i class="fas fa-question-circle"></i> Ayuda
+                    </button>
+                </div>
+                
+                <div class="estadisticas">
+                    <h4><i class="fas fa-chart-bar"></i> Tus Estadísticas</h4>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-icon"><i class="fas fa-trophy"></i></div>
+                            <div class="stat-content">
+                                <div class="stat-valor" id="mejor-puntuacion">0%</div>
+                                <div class="stat-label">Mejor puntuación</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-item">
+                            <div class="stat-icon"><i class="fas fa-file-alt"></i></div>
+                            <div class="stat-content">
+                                <div class="stat-valor" id="total-realizados">0</div>
+                                <div class="stat-label">Exámenes realizados</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-item">
+                            <div class="stat-icon"><i class="fas fa-check-double"></i></div>
+                            <div class="stat-content">
+                                <div class="stat-valor" id="promedio-correctas">0%</div>
+                                <div class="stat-label">Promedio de aciertos</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-item">
+                            <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                            <div class="stat-content">
+                                <div class="stat-valor" id="tiempo-promedio">0 min</div>
+                                <div class="stat-label">Tiempo promedio</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <footer class="footer">
+                <p><i class="fas fa-graduation-cap"></i> Simulador no oficial para fines de práctica | EXANI-I es propiedad de CENEVAL</p>
+                <p class="version">Versión 1.0 | Desarrollado para apoyo educativo</p>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Pantalla de Examen -->
+    <div id="pantalla-examen" class="pantalla">
+        <div class="container">
+            <header class="header-examen">
+                <div class="examen-header-content">
+                    <div class="examen-titulo">
+                        <h2><i class="fas fa-file-alt"></i> Examen Simulador EXANI-I</h2>
+                        <p class="examen-subtitulo">Pensamiento Matemático</p>
+                    </div>
+                    
+                    <div class="indicadores-examen">
+                        <div class="indicador destacado">
+                            <i class="fas fa-clock"></i>
+                            <div class="indicador-content">
+                                <div class="indicador-label">Tiempo Restante</div>
+                                <div class="indicador-valor" id="tiempo-restante">60:00</div>
+                            </div>
+                        </div>
+                        
+                        <div class="indicador">
+                            <i class="fas fa-question-circle"></i>
+                            <div class="indicador-content">
+                                <div class="indicador-label">Progreso</div>
+                                <div class="indicador-valor">
+                                    <span id="pregunta-actual">1</span> de <span id="total-preguntas-examen">50</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="indicador">
+                            <i class="fas fa-check-circle"></i>
+                            <div class="indicador-content">
+                                <div class="indicador-label">Respondidas</div>
+                                <div class="indicador-valor" id="preguntas-respondidas">0</div>
+                            </div>
+                        </div>
+                        
+                        <div class="indicador">
+                            <i class="fas fa-flag"></i>
+                            <div class="indicador-content">
+                                <div class="indicador-label">Marcadas</div>
+                                <div class="indicador-valor" id="preguntas-marcadas">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            
+            <div class="progreso-examen">
+                <div class="progreso-info">
+                    <span>Progreso del examen</span>
+                    <span id="porcentaje-progreso">0%</span>
+                </div>
+                <div class="progreso-bar-container">
+                    <div class="progreso-bar" id="progreso-bar"></div>
+                </div>
+            </div>
+            
+            <div class="examen-content">
+                <div class="pregunta-container">
+                    <div class="pregunta-header">
+                        <div class="pregunta-numero">
+                            <span class="numero" id="numero-pregunta">1</span>
+                            <span class="numero-total">/50</span>
+                        </div>
+                        <div class="pregunta-dificultad">
+                            <span class="dificultad-badge" id="dificultad-pregunta">Media</span>
+                            <span class="pregunta-tema" id="tema-pregunta">Álgebra</span>
+                        </div>
+                    </div>
+                    
+                    <div class="pregunta-body">
+                        <h3 class="pregunta-texto" id="texto-pregunta">
+                            Cargando pregunta...
+                        </h3>
+                        
+                        <div class="pregunta-imagen" id="pregunta-imagen">
+                            <!-- Imagen opcional para la pregunta -->
+                        </div>
+                        
+                        <div class="opciones-container" id="opciones-container">
+                            <!-- Las opciones se cargarán aquí dinámicamente -->
+                        </div>
+                    </div>
+                    
+                    <div class="pregunta-acciones">
+                        <div class="acciones-izquierda">
+                            <button id="btn-marcar" class="btn-accion">
+                                <i class="far fa-flag"></i> Marcar para revisar
+                            </button>
+                            <button id="btn-limpiar" class="btn-accion">
+                                <i class="fas fa-eraser"></i> Limpiar respuesta
+                            </button>
+                        </div>
+                        
+                        <div class="acciones-derecha">
+                            <button id="btn-anterior" class="btn-secundario">
+                                <i class="fas fa-arrow-left"></i> Anterior
+                            </button>
+                            <button id="btn-siguiente" class="btn-primario">
+                                Siguiente <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="ayuda-pregunta">
+                        <p><i class="fas fa-lightbulb"></i> <strong>Consejo:</strong> Selecciona solo una opción. Puedes cambiar tu respuesta en cualquier momento.</p>
+                    </div>
+                </div>
+                
+                <div class="panel-lateral">
+                    <div class="panel-seccion">
+                        <h4><i class="fas fa-list"></i> Navegación Rápida</h4>
+                        <div class="grid-preguntas" id="grid-preguntas">
+                            <!-- Los números de pregunta se generarán aquí -->
+                        </div>
+                    </div>
+                    
+                    <div class="panel-seccion">
+                        <h4><i class="fas fa-filter"></i> Filtros</h4>
+                        <div class="filtros">
+                            <button class="filtro-btn activo" data-filtro="todas">Todas</button>
+                            <button class="filtro-btn" data-filtro="respondidas">Respondidas</button>
+                            <button class="filtro-btn" data-filtro="no-respondidas">Sin responder</button>
+                            <button class="filtro-btn" data-filtro="marcadas">Marcadas</button>
+                        </div>
+                    </div>
+                    
+                    <div class="panel-seccion">
+                        <h4><i class="fas fa-bolt"></i> Acciones Rápidas</h4>
+                        <div class="acciones-rapidas">
+                            <button id="btn-saltar" class="btn-rapido">
+                                <i class="fas fa-forward"></i> Saltar pregunta
+                            </button>
+                            <button id="btn-finalizar-temprano" class="btn-rapido peligro">
+                                <i class="fas fa-flag-checkered"></i> Finalizar ahora
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pantalla de Resultados -->
+    <div id="pantalla-resultados" class="pantalla">
+        <div class="container">
+            <header>
+                <h1><i class="fas fa-chart-line"></i> Resultados del Examen</h1>
+                <p>Análisis detallado de tu desempeño</p>
+            </header>
+            
+            <div class="resultados-container">
+                <div class="resumen-principal">
+                    <div class="resultado-destacado">
+                        <div class="puntuacion-circular">
+                            <svg width="120" height="120" viewBox="0 0 120 120">
+                                <circle cx="60" cy="60" r="54" fill="none" stroke="#e0e6ef" stroke-width="12"/>
+                                <circle cx="60" cy="60" r="54" fill="none" stroke="#667eea" stroke-width="12" 
+                                        stroke-linecap="round" id="circulo-puntuacion"/>
+                            </svg>
+                            <div class="puntuacion-centro">
+                                <div class="puntuacion-final" id="puntuacion-final">0%</div>
+                                <div class="puntuacion-label">Puntuación</div>
+                            </div>
+                        </div>
+                        
+                        <div class="resultado-info">
+                            <h3 id="calificacion-texto">Cargando análisis...</h3>
+                            <p class="resultado-descripcion" id="resultado-descripcion">
+                                Tu desempeño se está cargando...
+                            </p>
+                            <div class="resultado-meta">
+                                <p><i class="fas fa-calendar"></i> Fecha: <span id="fecha-examen">--/--/----</span></p>
+                                <p><i class="fas fa-clock"></i> Duración: <span id="duracion-examen">0:00</span></p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stats-principales">
+                        <div class="stat-principal correcta">
+                            <div class="stat-header">
+                                <i class="fas fa-check-circle"></i>
+                                <h4>Respuestas Correctas</h4>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-numero" id="respuestas-correctas">0</div>
+                                <div class="stat-progreso">
+                                    <div class="progreso-bg">
+                                        <div class="progreso-fill" id="progreso-correctas"></div>
+                                    </div>
+                                    <span id="porcentaje-correctas">0%</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-principal incorrecta">
+                            <div class="stat-header">
+                                <i class="fas fa-times-circle"></i>
+                                <h4>Respuestas Incorrectas</h4>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-numero" id="respuestas-incorrectas">0</div>
+                                <div class="stat-progreso">
+                                    <div class="progreso-bg">
+                                        <div class="progreso-fill" id="progreso-incorrectas"></div>
+                                    </div>
+                                    <span id="porcentaje-incorrectas">0%</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-principal tiempo">
+                            <div class="stat-header">
+                                <i class="fas fa-clock"></i>
+                                <h4>Tiempo Utilizado</h4>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-numero" id="tiempo-usado">0:00</div>
+                                <div class="stat-detalle">
+                                    <p><span id="tiempo-por-pregunta">0s</span> por pregunta</p>
+                                    <p><span id="tiempo-restante-examen">0:00</span> restante</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-principal velocidad">
+                            <div class="stat-header">
+                                <i class="fas fa-tachometer-alt"></i>
+                                <h4>Velocidad</h4>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-numero" id="velocidad-examen">0.0</div>
+                                <div class="stat-detalle">
+                                    <p>Preguntas por minuto</p>
+                                    <p class="velocidad-nivel" id="nivel-velocidad">Normal</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="analisis-detallado">
+                    <div class="analisis-seccion">
+                        <h3><i class="fas fa-list-ol"></i> Revisión por Pregunta</h3>
+                        <div class="filtros-revision">
+                            <button class="filtro-revision activo" data-filtro="todas">Todas</button>
+                            <button class="filtro-revision" data-filtro="correctas">Correctas</button>
+                            <button class="filtro-revision" data-filtro="incorrectas">Incorrectas</button>
+                            <button class="filtro-revision" data-filtro="sin-responder">Sin responder</button>
+                        </div>
+                        
+                        <div class="lista-revision" id="lista-revision">
+                            <!-- Las preguntas con resultados se mostrarán aquí -->
+                        </div>
+                    </div>
+                    
+                    <div class="analisis-seccion">
+                        <h3><i class="fas fa-chart-pie"></i> Análisis por Tema</h3>
+                        <div class="grafica-temas" id="grafica-temas">
+                            <!-- Gráfica de temas se generará aquí -->
+                        </div>
+                        <div class="temas-lista" id="temas-lista">
+                            <!-- Lista de temas se generará aquí -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="recomendaciones">
+                    <h3><i class="fas fa-graduation-cap"></i> Recomendaciones de Estudio</h3>
+                    <div class="recomendaciones-grid" id="recomendaciones-grid">
+                        <!-- Recomendaciones se generarán aquí -->
+                    </div>
+                </div>
+                
+                <div class="acciones-resultados">
+                    <button id="btn-reiniciar" class="btn-primario btn-grande">
+                        <i class="fas fa-redo"></i> Intentar Nuevamente
+                    </button>
+                    
+                    <button id="btn-ver-explicaciones" class="btn-secundario">
+                        <i class="fas fa-book-open"></i> Ver Explicaciones Completas
+                    </button>
+                    
+                    <button id="btn-inicio" class="btn-secundario">
+                        <i class="fas fa-home"></i> Volver al Inicio
+                    </button>
+                    
+                    <button id="btn-compartir" class="btn-secundario">
+                        <i class="fas fa-share-alt"></i> Compartir Resultados
+                    </button>
+                </div>
+            </div>
+            
+            <footer class="footer">
+                <p><i class="fas fa-info-circle"></i> Este simulador es una herramienta de práctica. Los resultados no garantizan el desempeño en el examen real.</p>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Modal de Instrucciones -->
+    <div id="modal-instrucciones" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-question-circle"></i> Instrucciones Detalladas</h3>
+                <button class="modal-cerrar">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Contenido de instrucciones detalladas...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="script.js"></script>
+</body>
+</html>
