@@ -1,0 +1,335 @@
+
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tabla Periódica Interactiva – CenevalMaster</title>
+  <style>
+    :root{
+      --bg:#0f172a; --panel:#111827; --text:#e5e7eb; --muted:#9ca3af; --accent:#22c55e;
+      /* Colores por categoría (puedes ajustar libremente) */
+      --cat-alkali-metal:#f59e0b;
+      --cat-alkaline-earth-metal:#fde047;
+      --cat-transition-metal:#60a5fa;
+      --cat-post-transition-metal:#93c5fd;
+      --cat-metalloid:#34d399;
+      --cat-nonmetal:#86efac;
+      --cat-halogen:#fca5a5;
+      --cat-noble-gas:#f472b6;
+      --cat-lanthanide:#c4b5fd;
+      --cat-actinide:#a78bfa;
+      --cat-unknown:#6b7280;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial}
+    header{padding:20px;border-bottom:1px solid #1f2937;background:#0b1220;position:sticky;top:0;z-index:10}
+    h1{margin:0 0 10px;font-size:1.4rem}
+    .controls{display:grid;grid-template-columns: repeat(auto-fill,minmax(200px,1fr)); gap:10px}
+    .control{display:flex;flex-direction:column;gap:6px}
+    input,select{background:#0b1220;color:var(--text);border:1px solid #1f2937;border-radius:8px;padding:8px}
+    .legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+    .legend span{display:inline-flex;align-items:center;gap:6px;background:#0b1220;border:1px solid #1f2937;border-radius:999px;padding:4px 8px;font-size:.85rem}
+    .swatch{width:14px;height:14px;border-radius:3px;display:inline-block}
+    main{padding:16px}
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(18, minmax(58px, 1fr));
+      grid-auto-rows: 58px;
+      gap:8px;
+      justify-content:center;
+      max-width:1400px;margin:0 auto;
+    }
+    .cell{
+      position:relative;
+      border-radius:10px;
+      padding:6px;
+      background:#0b1220;
+      border:1px solid #1f2937;
+      cursor:pointer;
+      transition:transform .08s ease, box-shadow .1s ease, border-color .1s ease;
+      overflow:hidden;
+    }
+    .cell:hover{transform:translateY(-2px);border-color:#334155; box-shadow:0 6px 16px rgba(0,0,0,.35)}
+    .num{position:absolute;top:6px;left:6px;font-size:.75rem;color:var(--muted)}
+    .sym{font-size:1.1rem;font-weight:700;line-height:1;margin-top:8px}
+    .name{font-size:.7rem;color:var(--muted);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .mass{position:absolute;bottom:6px;right:6px;font-size:.7rem;color:var(--muted)}
+    .tag{position:absolute;top:6px;right:6px;font-size:.65rem;padding:2px 6px;border-radius:6px;color:#0b1220;font-weight:600}
+    .hint{font-size:.85rem;color:var(--muted);text-align:center;margin:12px 0}
+
+    /* Modal */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;padding:12px;z-index:50}
+    .modal{background:#0b1220;border:1px solid #1f2937;border-radius:14px;max-width:920px;width:100%;max-height:90vh;overflow:auto}
+    .modal header{position:sticky;top:0;background:#0b1220;border-bottom:1px solid #1f2937}
+    .modal .title{display:flex;align-items:center;justify-content:space-between}
+    .modal .title h2{margin:0;font-size:1.2rem}
+    .close-btn{background:#1f2937;color:var(--text);border:0;border-radius:10px;padding:8px 12px;cursor:pointer}
+    .modal .content{padding:14px;display:grid;grid-template-columns:1.2fr .8fr;gap:14px}
+    .kv{display:grid;grid-template-columns:.9fr 1.1fr;gap:10px}
+    .kv div{padding:8px;background:#0b1220;border:1px solid #1f2937;border-radius:10px}
+    .section h3{margin:8px 0;font-size:1rem}
+    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size:.9rem}
+    .pill{display:inline-block;padding:4px 8px;border-radius:999px;border:1px solid #1f2937;background:#0b1220;margin-right:6px}
+    .footer-note{padding:10px;color:var(--muted);font-size:.8rem;text-align:center}
+
+    /* Categoría a color */
+    .cat-alkali-metal   {background:var(--cat-alkali-metal);}
+    .cat-alkaline-earth-metal {background:var(--cat-alkaline-earth-metal);}
+    .cat-transition-metal     {background:var(--cat-transition-metal);}
+    .cat-post-transition-metal{background:var(--cat-post-transition-metal);}
+    .cat-metalloid            {background:var(--cat-metalloid);}
+    .cat-nonmetal             {background:var(--cat-nonmetal);}
+    .cat-halogen              {background:var(--cat-halogen);}
+    .cat-noble-gas            {background:var(--cat-noble-gas);}
+    .cat-lanthanide           {background:var(--cat-lanthanide);}
+    .cat-actinide             {background:var(--cat-actinide);}
+    .cat-unknown              {background:var(--cat-unknown);}
+
+    /* Responsivo */
+    @media (max-width:900px){
+      .grid{grid-template-columns: repeat(18, minmax(46px, 1fr)); grid-auto-rows:46px}
+      .sym{font-size:.95rem}
+      .modal .content{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Tabla Periódica Interactiva – CenevalMaster</h1>
+    <div class="controls">
+      <div class="control">
+        <label for="search">Buscar (símbolo, nombre o Z)</label>
+        <input id="search" type="text" placeholder="Ej.: Fe, Oxígeno, 26" />
+      </div>
+      <div class="control">
+        <label for="block">Bloque</label>
+        <select id="block">
+          <option value="">Todos</option>
+          <option value="s">s</option>
+          <option value="p">p</option>
+          <option value="d">d</option>
+          <option value="f">f</option>
+        </select>
+      </div>
+      <div class="control">
+        <label for="category">Tipo / Categoría</label>
+        <select id="category">
+          <option value="">Todos</option>
+          <option value="alkali metal">Metal alcalino</option>
+          <option value="alkaline earth metal">Metal alcalinotérreo</option>
+          <option value="transition metal">Metal de transición</option>
+          <option value="post-transition metal">Metal post-transición</option>
+          <option value="metalloid">Metaloide</option>
+          <option value="nonmetal">No metal</option>
+          <option value="halogen">Halógeno</option>
+          <option value="noble gas">Gas noble</option>
+          <option value="lanthanide">Lantánido</option>
+          <option value="actinide">Actínido</option>
+        </select>
+      </div>
+      <div class="control">
+        <label for="phase">Fase a 20 °C</label>
+        <select id="phase">
+          <option value="">Todas</option>
+          <option value="solid">Sólido</option>
+          <option value="liquid">Líquido</option>
+          <option value="gas">Gas</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="legend">
+      <span><i class="swatch" style="background:var(--cat-alkali-metal)"></i> Metal alcalino</span>
+      <span><i class="swatch" style="background:var(--cat-alkaline-earth-metal)"></i> Metal alcalinotérreo</span>
+      <span><i class="swatch" style="background:var(--cat-transition-metal)"></i> Metal de transición</span>
+      <span><i class="swatch" style="background:var(--cat-post-transition-metal)"></i> Post-transición</span>
+      <span><i class="swatch" style="background:var(--cat-metalloid)"></i> Metaloide</span>
+      <span><i class="swatch" style="background:var(--cat-nonmetal)"></i> No metal</span>
+      <span><i class="swatch" style="background:var(--cat-halogen)"></i> Halógeno</span>
+      <span><i class="swatch" style="background:var(--cat-noble-gas)"></i> Gas noble</span>
+      <span><i class="swatch" style="background:var(--cat-lanthanide)"></i> Lantánido</span>
+      <span><i class="swatch" style="background:var(--cat-actinide)"></i> Actínido</span>
+    </div>
+  </header>
+
+  <main>
+    <p class="hint">Tip: escribe un símbolo (Na), nombre (Sodio) o número atómico (11) para filtrar. Clic en un elemento para ver detalles.</p>
+    <div class="grid" id="grid" aria-live="polite"></div>
+  </main>
+
+  <!-- Modal -->
+  <div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal" id="modal">
+      <header>
+        <div class="title">
+          <h2 id="modalTitle">Elemento</h2>
+          <button class="close-btn" id="closeBtn">Cerrar ✕</button>
+        </div>
+      </header>
+      <div class="content" id="modalContent">
+        <!-- contenido dinámico -->
+      </div>
+      <div class="footer-note">Datos: Periodic Table JSON (Bowserinator) — Unidades: masa (u), densidad (g/cm³), temperatura (K)</div>
+    </div>
+  </div>
+
+  <script>
+    const DATA_URL = 'https://raw.githubusercontent.com/Bowserinator/Periodic-Table-JSON/master/PeriodicTableJSON.json';
+
+    const grid = document.getElementById('grid');
+    const searchInput = document.getElementById('search');
+    const blockSelect = document.getElementById('block');
+    const categorySelect = document.getElementById('category');
+    const phaseSelect = document.getElementById('phase');
+    const modalBackdrop = document.getElementById('modalBackdrop');
+    const modalContent = document.getElementById('modalContent');
+    const closeBtn = document.getElementById('closeBtn');
+    let ELEMENTS = [];
+
+    const categoryToClass = (cat) => {
+      if(!cat) return 'cat-unknown';
+      const key = cat.toLowerCase().replaceAll(' ', '-');
+      return ['alkali-metal','alkaline-earth-metal','transition-metal','post-transition-metal','metalloid','nonmetal','halogen','noble-gas','lanthanide','actinide'].includes(key)
+        ? 'cat-'+key : 'cat-unknown';
+    };
+    const categoryEs = (cat) => {
+      const map = {
+        'alkali metal':'Metal alcalino',
+        'alkaline earth metal':'Metal alcalinotérreo',
+        'transition metal':'Metal de transición',
+        'post-transition metal':'Metal post-transición',
+        'metalloid':'Metaloide',
+        'nonmetal':'No metal',
+        'halogen':'Halógeno',
+        'noble gas':'Gas noble',
+        'lanthanide':'Lantánido',
+        'actinide':'Actínido'
+      };
+      return map[cat?.toLowerCase()] || 'Desconocido';
+    };
+    const phaseEs = (ph) => ({'solid':'Sólido','liquid':'Líquido','gas':'Gas'}[ph] || 'Desconocida');
+
+    // Derivar bloque (s/p/d/f) desde la configuración electrónica (último orbital)
+    function getBlock(el){
+      const conf = el.electron_configuration || el.electronConfiguration || '';
+      const m = conf.trim().match(/([spdf])\d+$/i);
+      return m ? m[1].toLowerCase() : '';
+    }
+
+    function render(){
+      grid.innerHTML = '';
+      const q = (searchInput.value || '').trim().toLowerCase();
+      const b = blockSelect.value;
+      const c = categorySelect.value;
+      const p = phaseSelect.value;
+
+      const filtered = ELEMENTS.filter(el=>{
+        // búsqueda
+        const matchesQ = !q || el.symbol.toLowerCase().includes(q) ||
+                         el.name.toLowerCase().includes(q) ||
+                         String(el.number) === q;
+        // filtros
+        const matchesB = !b || getBlock(el) === b;
+        const matchesC = !c || (el.category && el.category.toLowerCase() === c.toLowerCase());
+        const matchesP = !p || (el.phase && el.phase.toLowerCase() === p.toLowerCase());
+        return matchesQ && matchesB && matchesC && matchesP;
+      });
+
+      // Pintar por coordenadas (xpos: grupo, ypos: período/filas especiales)
+      filtered.forEach(el=>{
+        const cell = document.createElement('button');
+        cell.className = 'cell';
+        cell.style.gridColumn = el.xpos;
+        cell.style.gridRow = el.ypos;
+        cell.setAttribute('aria-label', `${el.name} (${el.symbol}), Z=${el.number}`);
+
+        const tag = document.createElement('span');
+        tag.className = 'tag ' + categoryToClass(el.category);
+        tag.textContent = getBlock(el).toUpperCase() || '—';
+        cell.appendChild(tag);
+
+        const num = document.createElement('div'); num.className='num'; num.textContent = el.number; cell.appendChild(num);
+        const sym = document.createElement('div'); sym.className='sym'; sym.textContent = el.symbol; cell.appendChild(sym);
+        const name = document.createElement('div'); name.className='name'; name.textContent = el.name; cell.appendChild(name);
+
+        const mass = document.createElement('div');
+        mass.className='mass';
+        mass.textContent = el.atomic_mass ? Number(el.atomic_mass).toFixed(2) : '—';
+        cell.appendChild(mass);
+
+        cell.addEventListener('click', ()=>openModal(el));
+        grid.appendChild(cell);
+      });
+    }
+
+    function fmtFloat(v, digits=2){ return (v||v===0) ? Number(v).toFixed(digits) : '—'; }
+
+    function openModal(el){
+      const ionization_list = (el.ionization_energies || el.ionizationEnergies || []).map(x=>fmtFloat(x)).join(', ');
+      const shells = (el.shells || []).join(', ');
+      const conf = el.electron_configuration || el.electronConfiguration || '—';
+      modalContent.innerHTML = `
+        <section class="section">
+          <h3><span class="pill">${el.symbol}</span> <span class="pill">Z=${el.number}</span> <span class="pill">${categoryEs(el.category)}</span></h3>
+          <div class="kv">
+            <div><strong>Nombre:</strong><br>${el.name}</div>
+            <div><strong>Bloque:</strong><br>${(getBlock(el)||'—').toUpperCase()}</div>
+            <div><strong>Masa atómica (u):</strong><br>${fmtFloat(el.atomic_mass,3)}</div>
+            <div><strong>Densidad (g/cm³):</strong><br>${fmtFloat(el.density)}</div>
+            <div><strong>P. fusión (K):</strong><br>${fmtFloat(el.melt)}</div>
+            <div><strong>P. ebullición (K):</strong><br>${fmtFloat(el.boil)}</div>
+            <div><strong>Electronegatividad (Pauling):</strong><br>${fmtFloat(el.electronegativity_pauling)}</div>
+            <div><strong>Fase (20 °C):</strong><br>${phaseEs(el.phase)}</div>
+          </div>
+        </section>
+        <section class="section">
+          <h3>Configuración electrónica</h3>
+          <div class="mono">${conf}</div>
+          <div style="margin-top:8px"><strong>Capas electrónicas:</strong> ${shells || '—'}</div>
+          <div style="margin-top:8px"><strong>Energías de ionización (kJ/mol):</strong><br>${ionization_list || '—'}</div>
+        </section>
+        <section class="section">
+          <h3>Información adicional</h3>
+          <div class="kv">
+            <div><strong>Periodo:</strong><br>${el.period || '—'}</div>
+            <div><strong>Grupo (xpos):</strong><br>${el.xpos || '—'}</div>
+            <div><strong>Apariencia:</strong><br>${el.appearance || '—'}</div>
+            <div><strong>Descubierto por:</strong><br>${el.discovered_by || '—'}</div>
+            <div><strong>Nombrado por:</strong><br>${el.named_by || '—'}</div>
+            <div><strong>Calor molar (J/mol·K):</strong><br>${fmtFloat(el.molar_heat)}</div>
+          </div>
+          <p style="margin-top:8px">${el.summary || ''}</p>
+          <p style="margin-top:8px"><a href="${el.source}" target="_blank" rel="noopener">Fuente</a></p>
+        </section>
+      `;
+      document.getElementById('modalTitle').textContent = `${el.name} (${el.symbol})`;
+      modalBackdrop.style.display = 'flex';
+    }
+
+    function closeModal(){ modalBackdrop.style.display='none'; }
+    modalBackdrop.addEventListener('click', (e)=>{ if(e.target === modalBackdrop) closeModal(); });
+    closeBtn.addEventListener('click', closeModal);
+    document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeModal(); });
+
+    // Eventos de búsqueda y filtros
+    [searchInput, blockSelect, categorySelect, phaseSelect].forEach(el=>{
+      el.addEventListener('input', render);
+      el.addEventListener('change', render);
+    });
+
+    // Carga de datos
+    (async function init(){
+      try{
+        const res = await fetch(DATA_URL);
+        const json = await res.json();
+        ELEMENTS = (json.elements || []).sort((a,b)=>a.number - b.number);
+        render();
+      }catch(err){
+        grid.innerHTML = '<p>Error al cargar datos. Revisa tu conexión o el enlace del dataset.</p>';
+        console.error(err);
+      }
+    })();
+  </script>
+</body>
+</html>
